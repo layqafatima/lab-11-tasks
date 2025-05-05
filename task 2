@@ -1,0 +1,64 @@
+#include <iostream>
+#include <stdexcept>
+
+using namespace std;
+
+class DimensionMismatchException : public exception {
+public:
+    const char* what() const noexcept override {
+        return "Matrix dimensions do not match.";
+    }
+};
+
+template <typename T, int rows, int cols>
+class Matrix {
+private:
+    T data[rows][cols];
+
+public:
+    Matrix() {
+        for (int i = 0; i < rows; ++i)
+            for (int j = 0; j < cols; ++j)
+                data[i][j] = T();
+    }
+
+    T& at(int i, int j) {
+        if (i < 0 || i >= rows || j < 0 || j >= cols)
+            throw out_of_range("Matrix index out of bounds.");
+        return data[i][j];
+    }
+
+    const T& at(int i, int j) const {
+        if (i < 0 || i >= rows || j < 0 || j >= cols)
+            throw out_of_range("Matrix index out of bounds.");
+        return data[i][j];
+    }
+
+    Matrix<T, rows, cols> operator+(const Matrix<T, rows, cols>& other) const {
+        Matrix<T, rows, cols> result;
+        for (int i = 0; i < rows; ++i)
+            for (int j = 0; j < cols; ++j)
+                result.data[i][j] = this->data[i][j] + other.data[i][j];
+        return result;
+    }
+
+    template<int otherCols>
+    Matrix<T, rows, otherCols> operator*(const Matrix<T, cols, otherCols>& other) const {
+        Matrix<T, rows, otherCols> result;
+        for (int i = 0; i < rows; ++i)
+            for (int j = 0; j < otherCols; ++j) {
+                result.at(i, j) = T();
+                for (int k = 0; k < cols; ++k)
+                    result.at(i, j) += this->at(i, k) * other.at(k, j);
+            }
+        return result;
+    }
+
+    void print() const {
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j)
+                cout << data[i][j] << " ";
+            cout << endl;
+        }
+    }
+};
