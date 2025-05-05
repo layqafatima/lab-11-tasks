@@ -1,0 +1,74 @@
+#include <iostream>
+#include <stdexcept>
+using namespace std;
+
+class StackUnderflowException : public exception {
+public:
+    const char* what() const noexcept override {
+        return "Stack underflow: Operation attempted on an empty stack.";
+    }
+};
+
+template <typename T>
+class Stack {
+private:
+    T* data;
+    int capacity;
+    int topIndex;
+
+public:
+    Stack(int size = 100) {
+        capacity = size;
+        data = new T[capacity];
+        topIndex = -1;
+    }
+
+    ~Stack() {
+        delete[] data;
+    }
+
+    void push(const T& item) {
+        if (topIndex >= capacity - 1) {
+            throw overflow_error("Stack overflow: Cannot push more items.");
+        }
+        data[++topIndex] = item;
+    }
+
+    void pop() {
+        if (topIndex < 0) {
+            throw StackUnderflowException();
+        }
+        topIndex--;
+    }
+
+    T top() const {
+        if (topIndex < 0) {
+            throw StackUnderflowException();
+        }
+        return data[topIndex];
+    }
+
+    bool isEmpty() const {
+        return topIndex < 0;
+    }
+};
+
+int main() {
+    Stack<int> stack(3);
+
+    try {
+        stack.push(10);
+        stack.push(20);
+        stack.push(30);
+        cout << "Top: " << stack.top() << endl;
+        stack.pop();
+        cout << "Top after pop: " << stack.top() << endl;
+        stack.pop();
+        stack.pop();
+        stack.pop();
+    } catch (const exception& e) {
+        cout << "Exception: " << e.what() << endl;
+    }
+
+    return 0;
+}
