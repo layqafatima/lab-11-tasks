@@ -1,0 +1,55 @@
+#include <iostream>
+#include <exception>
+using namespace std;
+
+class ArrayIndexOutOfBounds : public exception {
+public:
+    const char* what() const noexcept override {
+        return "ArrayIndexOutOfBounds: Invalid index accessed.";
+    }
+};
+
+template<typename T>
+class SafeArray {
+private:
+    T* data;
+    int size;
+
+public:
+    SafeArray(int s) {
+        if (s <= 0) throw invalid_argument("Size must be positive.");
+        size = s;
+        data = new T[size];
+    }
+
+    ~SafeArray() {
+        delete[] data;
+    }
+
+    T& operator[](int index) {
+        if (index < 0 || index >= size) throw ArrayIndexOutOfBounds();
+        return data[index];
+    }
+
+    int getSize() const {
+        return size;
+    }
+};
+
+int main() {
+    try {
+        SafeArray<int> arr(5);
+        for (int i = 0; i < arr.getSize(); i++) {
+            arr[i] = i * 2;
+        }
+
+        for (int i = 0; i <= arr.getSize(); i++) {
+            cout << "arr[" << i << "] = " << arr[i] << endl;
+        }
+
+    } catch (const exception& e) {
+        cout << "Exception: " << e.what() << endl;
+    }
+
+    return 0;
+}
