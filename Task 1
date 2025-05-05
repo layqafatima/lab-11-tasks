@@ -1,0 +1,52 @@
+#include <iostream>
+#include <string>
+#include <any>
+#include <vector>
+using namespace std;
+
+class BadTypeException : public exception {
+public:
+    const char* what() const noexcept override {
+        return "BadTypeException: Type mismatch during retrieval.";
+    }
+};
+
+class TypeSafeContainer {
+private:
+    vector<string> keys;
+    vector<any> values;
+
+public:
+    template<typename T>
+    void store(const string& key, const T& value) {
+        for (int i = 0; i < (int)keys.size(); i++) {
+            if (keys[i] == key) {
+                values[i] = value;
+                return;
+            }
+        }
+        keys.push_back(key);
+        values.push_back(value);
+    }
+
+    template<typename T>
+    T get(const string& key) const {
+        for (int i = 0; i < (int)keys.size(); i++) {
+            if (keys[i] == key) {
+                try {
+                    return any_cast<T>(values[i]);
+                } catch (...) {
+                    throw BadTypeException();
+                }
+            }
+        }
+        throw runtime_error("Key not found.");
+    }
+
+    bool contains(const string& key) const {
+        for (int i = 0; i < (int)keys.size(); i++) {
+            if (keys[i] == key) return true;
+        }
+        return false;
+    }
+};
